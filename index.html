@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVAL | الأزياء الراقية والمحتشمة</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            beige: '#F9F6F0',
+                            card: '#FFFFFF',
+                            olive: '#4A5D4E',
+                            oliveDark: '#364439',
+                            sand: '#D9C8B4',
+                            text: '#2C302E',
+                            accent: '#C5A880'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F9F6F0; color: #2C302E; font-family: 'Tajawal', sans-serif; }
+        .modal-active { overflow: hidden; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-brand-sand/30 transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Mobile Menu Trigger -->
+            <button class="md:hidden text-brand-text text-xl" onclick="toggleMobileMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <!-- Brand Logo (Secret Admin Trigger: Triple Click) -->
+            <div class="cursor-pointer select-none text-center" onclick="handleLogoClick()">
+                <h1 class="text-3xl font-extrabold tracking-widest text-brand-olive font-serif">EVAL</h1>
+                <p class="text-[10px] text-brand-accent tracking-widest uppercase">Modest Elegance</p>
+            </div>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-8 space-x-reverse text-sm font-medium">
+                <a href="#" onclick="filterCategory('all')" class="hover:text-brand-olive transition">الكل</a>
+                <a href="#" onclick="filterCategory('عبايات')" class="hover:text-brand-olive transition">عبايات</a>
+                <a href="#" onclick="filterCategory('مانطو')" class="hover:text-brand-olive transition">مانطو</a>
+                <a href="#" onclick="filterCategory('خمور')" class="hover:text-brand-olive transition">خمور</a>
+                <a href="#" onclick="filterCategory('فساتين')" class="hover:text-brand-olive transition">فساتين</a>
+            </nav>
+
+            <!-- User Actions -->
+            <div class="flex items-center space-x-5 space-x-reverse">
+                <button class="relative text-brand-text hover:text-brand-olive transition" onclick="toggleCart()">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-brand-olive text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-brand-sand/40 px-6 py-4 space-y-3">
+            <a href="#" onclick="filterCategory('all'); toggleMobileMenu();" class="block font-medium">الكل</a>
+            <a href="#" onclick="filterCategory('عبايات'); toggleMobileMenu();" class="block font-medium">عبايات</a>
+            <a href="#" onclick="filterCategory('مانطو'); toggleMobileMenu();" class="block font-medium">مانطو</a>
+            <a href="#" onclick="filterCategory('خمور'); toggleMobileMenu();" class="block font-medium">خمور</a>
+            <a href="#" onclick="filterCategory('فساتين'); toggleMobileMenu();" class="block font-medium">فساتين</a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+        <!-- Hero Banner -->
+        <section class="mb-12 bg-gradient-to-r from-brand-olive to-brand-oliveDark rounded-2xl p-8 md:p-12 text-white shadow-lg flex flex-col items-start justify-center relative overflow-hidden">
+            <div class="relative z-10 max-w-xl">
+                <span class="text-xs uppercase tracking-widest text-brand-sand font-semibold mb-2 block">تشكيلة الموسم الجديد</span>
+                <h2 class="text-3xl md:text-5xl font-extrabold leading-tight mb-4">الأناقة الهادئة والاحتشام الراقي</h2>
+                <p class="text-brand-beige/90 text-sm md:text-base mb-6">اكتشفي تصاميمنا المصممة بعناية فائقة بأجود أنواع الأقمشة لتناسب جميع أوقاتك.</p>
+                <a href="#products-section" class="bg-brand-sand text-brand-oliveDark px-6 py-3 rounded-xl font-bold hover:bg-white transition">استكشفي المجموعات</a>
+            </div>
+        </section>
+
+        <!-- Product Showcase Grid -->
+        <section id="products-section">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-bold text-brand-text" id="category-title">جميع التصاميم</h3>
+                <span id="product-count" class="text-sm text-gray-500">جاري التحميل...</span>
+            </div>
+
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Products dynamically rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Quick View Modal -->
+    <div id="product-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative max-h-[90vh]">
+            <button onclick="closeProductModal()" class="absolute top-4 left-4 z-10 bg-white/80 w-8 h-8 rounded-full flex items-center justify-center text-gray-600 hover:text-black">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="md:w-1/2 h-64 md:h-auto bg-gray-100 flex items-center justify-center">
+                <img id="modal-image" src="" alt="" class="w-full h-full object-cover">
+            </div>
+            <div class="md:w-1/2 p-6 flex flex-col justify-between overflow-y-auto">
+                <div>
+                    <span id="modal-category" class="text-xs font-semibold text-brand-accent uppercase"></span>
+                    <h2 id="modal-name" class="text-2xl font-bold text-brand-text mt-1"></h2>
+                    <p id="modal-price" class="text-xl font-extrabold text-brand-olive mt-2"></p>
+                    
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold text-gray-700">نوع القماش:</h4>
+                        <p id="modal-fabric" class="text-sm text-gray-600"></p>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-1">المقاسات المتاحة:</h4>
+                        <div id="modal-sizes" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-1">الألوان المتاحة:</h4>
+                        <div id="modal-colors" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold text-gray-700">الوصف:</h4>
+                        <p id="modal-description" class="text-sm text-gray-500 mt-1"></p>
+                    </div>
+                </div>
+
+                <button id="modal-add-btn" class="w-full bg-brand-olive text-white py-3 rounded-xl font-bold mt-6 hover:bg-brand-oliveDark transition">
+                    إضافة إلى السلة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Admin Panel Drawer -->
+    <div id="admin-panel" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-md hidden flex justify-end">
+        <div class="bg-white w-full max-w-lg h-full p-6 overflow-y-auto flex flex-col justify-between shadow-2xl">
+            <div>
+                <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                    <h2 class="text-xl font-bold text-brand-olive"><i class="fa-solid fa-user-shield ml-2"></i>لوحة تحكم المسؤول (EVAL)</h2>
+                    <button onclick="closeAdminPanel()" class="text-gray-500 hover:text-black text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <!-- Admin Add Product Form -->
+                <form id="add-product-form" onsubmit="handleSaveProduct(event)" class="space-y-4">
+                    <input type="hidden" id="admin-product-id">
+                    <div>
+                        <label class="block text-xs font-bold mb-1">اسم القطعة</label>
+                        <input type="text" id="admin-name" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-olive outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold mb-1">القسم</label>
+                            <select id="admin-category" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-olive outline-none">
+                                <option value="عبايات">عبايات</option>
+                                <option value="مانطو">مانطو</option>
+                                <option value="خمور">خمور</option>
+                                <option value="فساتين">فساتين</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold mb-1">السعر ($)</label>
+                            <input type="number" step="0.01" id="admin-price" required class="w-full border rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-olive outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold mb-1">نوع القماش</label>
+                        <input type="text" id="admin-fabric" placeholder="مثال: كريب سعودي فاخر" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold mb-1">المقاسات (مفصولة بفاصلة)</label>
+                        <input type="text" id="admin-sizes" placeholder="S, M, L, XL" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold mb-1">الألوان (مفصولة بفاصلة)</label>
+                        <input type="text" id="admin-colors" placeholder="أسود, زيتي, بيج" class="w-full border rounded-lg p-2.5 text-sm outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold mb-1">صورة القطعة</label>
+                        <input type="file" id="admin-image-file" accept="image/*" class="w-full border rounded-lg p-2 text-sm outline-none">
+                        <p class="text-[10px] text-gray-400 mt-1">يتم رفع الصورة مباشرة إلى Supabase Storage.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold mb-1">الوصف التفصيلي</label>
+                        <textarea id="admin-description" rows="3" class="w-full border rounded-lg p-2.5 text-sm outline-none"></textarea>
+                    </div>
+
+                    <button type="submit" id="save-btn" class="w-full bg-brand-olive text-white py-3 rounded-xl font-bold hover:bg-brand-oliveDark transition">
+                        حفظ القطعة في السحابة
+                    </button>
+                </form>
+            </div>
+            
+            <div class="mt-8 pt-4 border-t text-center">
+                <button onclick="closeAdminPanel()" class="text-xs text-red-500 font-bold hover:underline">إغلاق لوحة التحكم</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-brand-sand/40 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-2xl font-bold text-brand-olive font-serif tracking-widest">EVAL</h2>
+            <p class="text-xs text-gray-500 mt-1">جميع الحقوق محفوظة &copy; 2026</p>
+        </div>
+    </footer>
+
+    <!-- Logic JavaScript -->
+    <script>
+        // Supabase Cloud Configuration
+        const SUPABASE_URL = 'https://iokpmjyzdbmsmsqgpwth.supabase.co';
+        const SUPABASE_KEY = 'Sb_publishable_8KMV6LpTk2YyBXgnMha-oA_7yv0mK00';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let productsState = [];
+        let logoClickCount = 0;
+        let logoClickTimer = null;
+
+        // Fetch products on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchProducts();
+        });
+
+        // Triple Click Secret Admin Trigger
+        function handleLogoClick() {
+            logoClickCount++;
+            if (logoClickCount === 1) {
+                logoClickTimer = setTimeout(() => { logoClickCount = 0; }, 1000);
+            } else if (logoClickCount === 3) {
+                clearTimeout(logoClickTimer);
+                logoClickCount = 0;
+                promptAdminPassword();
+            }
+        }
+
+        function promptAdminPassword() {
+            const pwd = prompt("أدخل كلمة مرور لوحة التحكم المسؤول:");
+            if (pwd === "eval2026") {
+                document.getElementById('admin-panel').classList.remove('hidden');
+            } else if (pwd !== null) {
+                alert("كلمة المرور غير صحيحة!");
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        // Fetch Products from Supabase
+        async function fetchProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">جاري تحميل المنتجات من السحابة...</div>';
+            
+            const { data, error } = await _supabase.from('products').select('*').order('id', { ascending: false });
+            
+            if (error) {
+                console.error("Supabase Error:", error);
+                grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-500">حدث خطأ أثناء جلب المنتجات.</div>';
+                return;
+            }
+
+            productsState = data || [];
+            renderProducts(productsState);
+        }
+
+        // Render Product Cards
+        function renderProducts(list) {
+            const grid = document.getElementById('products-grid');
+            document.getElementById('product-count').textContent = `عدد القطع: ${list.length}`;
+            grid.innerHTML = '';
+
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-10 text-gray-400">لا توجد قطع متاحة حالياً.</div>';
+                return;
+            }
+
+            list.forEach(item => {
+                const img = item.image_url || 'https://via.placeholder.com/400x500?text=EVAL';
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-between border border-brand-sand/20 cursor-pointer";
+                card.innerHTML = `
+                    <div onclick="openProductModal(${item.id})">
+                        <div class="h-80 w-full overflow-hidden bg-gray-50 relative">
+                            <img src="${img}" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="${item.name}">
+                            <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-brand-olive">${item.category}</span>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-brand-text text-base line-clamp-1">${item.name}</h4>
+                            <p class="text-xs text-gray-400 mt-1 line-clamp-1">${item.fabric || 'أقمشة فاخرة'}</p>
+                            <div class="mt-3 flex justify-between items-center">
+                                <span class="font-extrabold text-brand-olive text-lg">$${item.price}</span>
+                                <span class="text-xs text-brand-accent underline">التفاصيل</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Category Filter
+        function filterCategory(cat) {
+            document.getElementById('category-title').textContent = cat === 'all' ? 'جميع التصاميم' : cat;
+            if (cat === 'all') {
+                renderProducts(productsState);
+            } else {
+                const filtered = productsState.filter(p => p.category === cat);
+                renderProducts(filtered);
+            }
+        }
+
+        // Quick View Modal
+        function openProductModal(id) {
+            const product = productsState.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('modal-image').src = product.image_url || 'https://via.placeholder.com/400x500';
+            document.getElementById('modal-name').textContent = product.name;
+            document.getElementById('modal-category').textContent = product.category;
+            document.getElementById('modal-price').textContent = `$${product.price}`;
+            document.getElementById('modal-fabric').textContent = product.fabric || 'غير محدد';
+            document.getElementById('modal-description').textContent = product.description || 'تصميم راقٍ ومتميز من EVAL.';
+
+            const sizesContainer = document.getElementById('modal-sizes');
+            sizesContainer.innerHTML = '';
+            (product.sizes || ['S', 'M', 'L', 'XL']).forEach(s => {
+                sizesContainer.innerHTML += `<span class="bg-brand-beige px-3 py-1 rounded-lg text-xs font-bold text-brand-text border">${s}</span>`;
+            });
+
+            const colorsContainer = document.getElementById('modal-colors');
+            colorsContainer.innerHTML = '';
+            (product.colors || ['اللون الأساسي']).forEach(c => {
+                colorsContainer.innerHTML += `<span class="bg-gray-100 px-3 py-1 rounded-lg text-xs font-bold text-gray-700 border">${c}</span>`;
+            });
+
+            document.getElementById('product-modal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // Admin: Save Product (With Storage File Upload)
+        async function handleSaveProduct(e) {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.textContent = 'جاري الحفظ والرفع للسحابة...';
+
+            const name = document.getElementById('admin-name').value;
+            const category = document.getElementById('admin-category').value;
+            const price = parseFloat(document.getElementById('admin-price').value);
+            const fabric = document.getElementById('admin-fabric').value;
+            const description = document.getElementById('admin-description').value;
+            const sizes = document.getElementById('admin-sizes').value.split(',').map(s => s.trim()).filter(Boolean);
+            const colors = document.getElementById('admin-colors').value.split(',').map(c => c.trim()).filter(Boolean);
+            const fileInput = document.getElementById('admin-image-file');
+
+            let imageUrl = '';
+
+            // Handle Image Upload to Storage
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}.${fileExt}`;
+                
+                const { data: uploadData, error: uploadError } = await _supabase.storage
+                    .from('product-images')
+                    .upload(fileName, file);
+
+                if (uploadError) {
+                    console.error("Upload error:", uploadError);
+                } else {
+                    const { data: publicUrlData } = _supabase.storage.from('product-images').getPublicUrl(fileName);
+                    imageUrl = publicUrlData.publicUrl;
+                }
+            }
+
+            // Insert Product Row into Supabase Table
+            const { data, error } = await _supabase.from('products').insert([{
+                name, category, price, fabric, description, sizes, colors, image_url: imageUrl
+            }]);
+
+            btn.disabled = false;
+            btn.textContent = 'حفظ القطعة في السحابة';
+
+            if (error) {
+                alert("حدث خطأ في الحفظ: " + error.message);
+            } else {
+                alert("تم إضافة القطعة بنجاح إلى قاعدة البيانات!");
+                document.getElementById('add-product-form').reset();
+                closeAdminPanel();
+                fetchProducts();
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
